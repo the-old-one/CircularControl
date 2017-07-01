@@ -5,6 +5,9 @@
 [![License](https://img.shields.io/cocoapods/l/CircularControl.svg?style=flat)](http://cocoapods.org/pods/CircularControl)
 [![Platform](https://img.shields.io/cocoapods/p/CircularControl.svg?style=flat)](http://cocoapods.org/pods/CircularControl)
 
+![](/Example/images/screenshot_1.png)
+![](/Example/images/screenshot_2.png)
+
 ## Example
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
@@ -13,16 +16,24 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Installation
 
-CircularControl is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+#### Cocoapods
+
+CircularControl is available through [CocoaPods](http://cocoapods.org). CocoaPods can be installed using [Ruby gems](https://rubygems.org/):
+```shell
+$ gem install cocoapods
+```
+To install it, simply add the following line to your Podfile:
 
 ```ruby
 pod "CircularControl"
 ```
+#### Manual
+
+You can download the latest files from the repository. After doing so, copy the file `CircularControl.swift` to your project.
 
 ## Author
 
-Peyotle, peyot3d@gmail.com
+Oleg Chernyshenko, oleg@tugboat.nz
 
 ## License
 
