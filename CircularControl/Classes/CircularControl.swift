@@ -58,6 +58,9 @@ open class CircularControl: UIControl {
     }
 
     fileprivate func drawGradient(_ ctx: CGContext, in rect: CGRect) {
+        guard startColor != .clear,
+            endColor != .clear else { return }
+
         UIGraphicsBeginImageContext(self.bounds.size)
         let imageCtx = UIGraphicsGetCurrentContext()
 
@@ -103,6 +106,8 @@ open class CircularControl: UIControl {
     }
 
     fileprivate func drawBackground(_ ctx: CGContext) {
+        guard trackColor != .clear else { return }
+
         let start = CGFloat(radiansFromValue(minimumValue))
         let end = CGFloat(radiansFromValue(maximumValue))
         ctx.addArc(center: CGPoint(x: self.frame.size.width / 2.0, y: self.frame.size.height / 2.0),
@@ -117,6 +122,8 @@ open class CircularControl: UIControl {
     }
 
     fileprivate func drawHandle(_ ctx: CGContext) {
+        guard handleColor != .clear else { return }
+        
         ctx.saveGState()
         ctx.setShadow(offset: .zero, blur: 3, color: UIColor.black.cgColor)
 
@@ -265,7 +272,6 @@ open class CircularControl: UIControl {
         get { return self.handleColor }
         set { self.handleColor = newValue }
     }
-
 }
 
 private extension CGPoint {
