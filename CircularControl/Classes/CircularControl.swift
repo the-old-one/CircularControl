@@ -127,13 +127,10 @@ open class CircularControl: UIControl {
         ctx.saveGState()
         ctx.setShadow(offset: .zero, blur: 3, color: UIColor.black.cgColor)
 
-        let center = pointFromValue(_value)
-
         handleColor.set()
-        ctx.fillEllipse(in: CGRect(x: center.x,// + CGFloat(handleRadius),
-                                   y: center.y,// + CGFloat(handleRadius),
-                                   width: handleRadius * 2,
-                                   height: handleRadius * 2))
+        let origin = pointFromValue(_value)
+        let rect = CGRect(origin: origin, size: CGSize(width: handleRadius * 2, height: handleRadius * 2))
+        ctx.fillEllipse(in: rect)
         ctx.restoreGState()
     }
 
@@ -200,9 +197,10 @@ open class CircularControl: UIControl {
     }
 
     override open func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        let handleLocation = pointFromValue(_value)
-        let distance = handleLocation.distance(to: point)
-        if distance <= 20.0 {
+        let handleOrigin = pointFromValue(_value)
+        let handleCenter = CGPoint(x: handleOrigin.x + handleRadius, y: handleOrigin.y + handleRadius)
+        let distance = handleCenter.distance(to: point)
+        if distance <= max(handleRadius, 20) {
             return self
         }
         return nil
