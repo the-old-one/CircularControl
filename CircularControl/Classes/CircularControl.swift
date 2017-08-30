@@ -21,7 +21,10 @@ open class CircularControl: UIControl {
     /// Default 0.0. this value will be pinned to min/max
     open var value: Double {
         get { return _value }
-        set { _value = min(maximumValue, max(minimumValue, newValue)) }
+        set {
+            _value = min(maximumValue, max(minimumValue, newValue))
+            setNeedsDisplay()
+        }
     }
     /// Default 0.0. the current value may change if outside new min value
     open var minimumValue: Double = 0.0
@@ -53,8 +56,53 @@ open class CircularControl: UIControl {
     override open func draw(_ rect: CGRect) {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
         drawBackground(ctx)
-        drawGradient(ctx, in: rect)
+        isEnabled ? drawGradient(ctx, in: rect) : drawDisabledGradient(ctx, in: rect)
         drawHandle(ctx)
+    }
+
+    fileprivate func drawDisabledGradient(_ ctx: CGContext, in rect: CGRect) {
+        UIGraphicsBeginImageContext(self.bounds.size)
+        let imageCtx = UIGraphicsGetCurrentContext()
+
+        let currentDegrees = degreesFromValue(_value) - startAngle
+
+        imageCtx?.addArc(center: CGPoint(x: self.frame.size.width / 2.0, y: self.frame.size.height / 2.0),
+                         radius: radius,
+                         startAngle: CGFloat(degreesToRadians(startAngle)),
+                         endAngle: CGFloat(degreesToRadians(-currentDegrees)),
+                         clockwise: true)
+        UIColor.red.set()
+        imageCtx?.setShadow(offset: .zero, blur: shadowBlur, color: UIColor.black.cgColor)
+        imageCtx?.setLineWidth(lineWidth)
+        imageCtx?.setLineCap(.round)
+
+        imageCtx?.drawPath(using: .stroke)
+        guard let mask: CGImage = UIGraphicsGetCurrentContext()?.makeImage() else { return }
+        UIGraphicsEndImageContext()
+        ctx.saveGState()
+
+        ctx.clip(to: self.bounds, mask: mask)
+
+        //Draw the gradient
+        let startColorComps = UIColor.darkGray.cgColor.components!
+        let endColorComps = UIColor.lightGray.cgColor.components!
+
+        let components = [
+            startColorComps[0], 1.0,
+            endColorComps[0], 1.0
+        ]
+
+        let baseSpace = CGColorSpaceCreateDeviceGray()
+        let gradient = CGGradient(colorSpace: baseSpace,
+                                  colorComponents: components,
+                                  locations: nil,
+                                  count: 2)!
+        let startPoint = CGPoint(x: rect.midX, y: rect.minY)
+        let endPoint = CGPoint(x: rect.midX, y: rect.maxY)
+
+        ctx.drawLinearGradient(gradient, start: startPoint, end: endPoint, options: CGGradientDrawingOptions(rawValue: 0))
+
+        ctx.restoreGState()
     }
 
     fileprivate func drawGradient(_ ctx: CGContext, in rect: CGRect) {
@@ -123,11 +171,11 @@ open class CircularControl: UIControl {
 
     fileprivate func drawHandle(_ ctx: CGContext) {
         guard handleColor != .clear else { return }
-        
+
         ctx.saveGState()
         ctx.setShadow(offset: .zero, blur: 3, color: UIColor.black.cgColor)
 
-        handleColor.set()
+        isEnabled ? handleColor.set() : UIColor.lightGray.set()
         let origin = pointFromValue(_value)
         let rect = CGRect(origin: origin, size: CGSize(width: handleRadius * 2, height: handleRadius * 2))
         ctx.fillEllipse(in: rect)
@@ -217,6 +265,7 @@ open class CircularControl: UIControl {
 
     override open func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         super.endTracking(touch, with: event)
+        self.sendActions(for: .touchUpInside)
         // Send the drag end event
     }
 }
